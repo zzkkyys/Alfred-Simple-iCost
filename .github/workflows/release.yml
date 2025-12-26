@@ -1,0 +1,43 @@
+
+name: Release Alfred Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  build-and-release:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+
+      - name: Install dependencies
+        run: |
+          which zip || brew install zip
+          pip install xmltodict
+
+      - name: Build and package release
+        id: build_release
+        run: |
+          python3 build_release.py
+
+      - name: Create GitHub Release and Upload Asset
+        if: steps.build_release.outputs.skip == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.build_release.outputs.version }}
+          files: ${{ steps.build_release.outputs.workflow_file }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
