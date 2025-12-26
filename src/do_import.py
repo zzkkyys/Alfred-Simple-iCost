@@ -8,13 +8,24 @@ import json
 import sys
 import os
 
-WORKFLOW_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(WORKFLOW_DIR, "icost_data.json")
+# 添加 workflow 包路径
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-def load_data():
+from workflow import Workflow3
+
+DATA_FILENAME = "icost_data.json"
+
+
+def get_data_file_path(wf):
+    """获取数据文件路径（在 cache 目录下）"""
+    return wf.cachefile(DATA_FILENAME)
+
+
+def load_data(wf):
     """加载现有数据"""
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+    data_file = get_data_file_path(wf)
+    if os.path.exists(data_file):
+        with open(data_file, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {
         "accounts": [],
@@ -22,12 +33,14 @@ def load_data():
         "income_categories": {}
     }
 
-def save_data(data):
-    """保存数据"""
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
+
+def save_data(wf, data):
+    """保存数据到 cache 目录"""
+    data_file = get_data_file_path(wf)
+    with open(data_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-def import_from_excel(file_path):
+def import_from_excel(wf, file_path):
     """从 Excel 文件导入分类"""
     try:
         import openpyxl
@@ -113,7 +126,7 @@ def import_from_excel(file_path):
         wb.close()
         
         # 合并现有数据
-        existing_data = load_data()
+        existing_data = load_data(wf)
         
         # 合并账户
         all_accounts = list(set(list(existing_data.get("accounts", [])) + list(accounts)))
@@ -141,8 +154,9 @@ def import_from_excel(file_path):
         
         existing_data["accounts"] = all_accounts if all_accounts else existing_data.get("accounts", ["微信", "支付宝", "现金", "银行卡"])
         
-        # 保存数据
-        save_data(existing_data)
+        # 保存数据到 cache 目录
+        save_data(wf, existing_data)
+        wf.logger.info(f"Data saved to: {get_data_file_path(wf)}")
         
         expense_cat1_count = len(expense_categories)
         expense_cat2_count = sum(len(v) for v in expense_categories.values())
@@ -154,15 +168,17 @@ def import_from_excel(file_path):
     except Exception as e:
         return f"❌ 导入失败: {str(e)}"
 
-def main():
-    file_path = sys.argv[1].strip() if len(sys.argv) > 1 else ""
+def main(wf):
+    file_path = wf.args[0].strip() if wf.args else ""
     
     if file_path:
         file_path = os.path.expanduser(file_path)
-        result = import_from_excel(file_path)
+        result = import_from_excel(wf, file_path)
         print(result)
     else:
         print("❌ 未提供文件路径")
 
+
 if __name__ == "__main__":
-    main()
+    wf = Workflow3()
+    sys.exit(wf.run(main))

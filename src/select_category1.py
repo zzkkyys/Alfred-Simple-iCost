@@ -12,18 +12,23 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from workflow import Workflow3
+from icon_manager import get_icon_for_item, load_icons_list, preload_icons
 
-WORKFLOW_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(WORKFLOW_DIR, "icost_data.json")
+DATA_FILENAME = "icost_data.json"
 
 
-def load_data():
-    """加载分类和账户数据"""
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+def load_data(wf):
+    """加载分类和账户数据（从 cache 目录）"""
+    data_file = wf.cachefile(DATA_FILENAME)
+    if os.path.exists(data_file):
+        with open(data_file, 'r', encoding='utf-8') as f:
             return json.load(f)
-    with open("default_icost_data.json", 'r', encoding='utf-8') as f:
-        return json.load(f)
+    # 返回默认数据
+    return {
+        "accounts": ["微信", "支付宝", "现金", "银行卡"],
+        "expense_categories": {},
+        "income_categories": {}
+    }
 
 
 def main(wf):
@@ -48,7 +53,7 @@ def main(wf):
     account = data.get("account", "")
     
     # 加载分类数据
-    config = load_data()
+    config = load_data(wf)
     
     if record_type == "expense":
         categories = config.get("expense_categories", {})
@@ -66,11 +71,19 @@ def main(wf):
             valid=False
         )
     else:
+        # 预加载图标列表
+        icons_list = load_icons_list()
+        category_names = list(categories.keys())
+        preload_icons(wf, category_names, icons_list)
+        
         for cat1 in categories.keys():
             sub_categories = categories.get(cat1, [])
             sub_count = len(sub_categories)
+            # 获取匹配的图标
+            icon_path = get_icon_for_item(wf, cat1, icons_list)
+            
             wf.add_item(
-                title=f"📁 {cat1}",
+                title=f"{cat1}",
                 subtitle=f"{type_label} ¥{amount} | 账户: {account} | 包含 {sub_count} 个子分类",
                 arg=json.dumps({
                     "action": "select_category2",
@@ -81,7 +94,7 @@ def main(wf):
                     "category1": cat1
                 }),
                 uid=f"cat1_{cat1}",
-                icon="icon.png",
+                icon=icon_path,
                 valid=True
             )
     

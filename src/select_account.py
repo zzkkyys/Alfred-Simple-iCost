@@ -12,18 +12,23 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from workflow import Workflow3
+from icon_manager import get_icon_for_item, load_icons_list, preload_icons
 
-WORKFLOW_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(WORKFLOW_DIR, "icost_data.json")
+DATA_FILENAME = "icost_data.json"
 
 
-def load_data():
-    """加载分类和账户数据"""
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+def load_data(wf):
+    """加载分类和账户数据（从 cache 目录）"""
+    data_file = wf.cachefile(DATA_FILENAME)
+    if os.path.exists(data_file):
+        with open(data_file, 'r', encoding='utf-8') as f:
             return json.load(f)
-    with open("default_icost_data.json", 'r', encoding='utf-8') as f:
-        return json.load(f)
+    # 返回默认数据
+    return {
+        "accounts": ["微信", "支付宝", "现金", "银行卡"],
+        "expense_categories": {},
+        "income_categories": {}
+    }
 
 
 def main(wf):
@@ -50,14 +55,22 @@ def main(wf):
     remark = data.get("remark", "")
     
     # 加载账户列表
-    config = load_data()
+    config = load_data(wf)
     accounts = config.get("accounts", ["微信", "支付宝", "现金", "银行卡"])
+    
+    # 预加载图标列表
+    icons_list = load_icons_list()
+    # 预加载所有账户的图标
+    preload_icons(wf, accounts, icons_list)
     
     type_label = "消费" if record_type == "expense" else "收入"
     
     for account in accounts:
+        # 获取匹配的图标
+        icon_path = get_icon_for_item(wf, account, icons_list)
+        
         wf.add_item(
-            title=f"📱 {account}",
+            title=f"{account}",
             subtitle=f"使用 {account} 进行{type_label} ¥{amount}",
             arg=json.dumps({
                 "action": "select_category1",
@@ -67,7 +80,7 @@ def main(wf):
                 "account": account
             }),
             uid=f"account_{account}",
-            icon="icon.png",
+            icon=icon_path,
             valid=True
         )
     

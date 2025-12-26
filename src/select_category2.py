@@ -14,21 +14,27 @@ import urllib.parse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from workflow import Workflow3
+from icon_manager import get_icon_for_item, load_icons_list, preload_icons
 
-WORKFLOW_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(WORKFLOW_DIR, "icost_data.json")
+DATA_FILENAME = "icost_data.json"
 
 # 记账成功后的回调 URL（调用快捷指令"记账提醒"）
 X_SUCCESS_URL = "shortcuts://run-shortcut?name=iCostNotify"
 X_ERROR_URL = "shortcuts://run-shortcut?name=iCostError&"
 
-def load_data():
-    """加载分类和账户数据"""
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+
+def load_data(wf):
+    """加载分类和账户数据（从 cache 目录）"""
+    data_file = wf.cachefile(DATA_FILENAME)
+    if os.path.exists(data_file):
+        with open(data_file, 'r', encoding='utf-8') as f:
             return json.load(f)
-    with open("default_icost_data.json", 'r', encoding='utf-8') as f:
-        return json.load(f)
+    # 返回默认数据
+    return {
+        "accounts": ["微信", "支付宝", "现金", "银行卡"],
+        "expense_categories": {},
+        "income_categories": {}
+    }
 
 
 def build_url(record_type, amount, account, category, remark=""):
@@ -73,7 +79,7 @@ def main(wf):
     category1 = data.get("category1", "")
     
     # 加载分类数据
-    config = load_data()
+    config = load_data(wf)
     
     if record_type == "expense":
         categories = config.get("expense_categories", {})
@@ -85,27 +91,37 @@ def main(wf):
     # 获取二级分类
     sub_categories = categories.get(category1, [])
     
+    # 预加载图标列表
+    icons_list = load_icons_list()
+    
     if not sub_categories:
         # 如果没有二级分类，直接使用一级分类
         url = build_url(record_type, amount, account, category1, remark)
+        icon_path = get_icon_for_item(wf, category1, icons_list)
+        
         wf.add_item(
             title=f"✅ 直接记账: {category1}",
             subtitle=f"{type_label} ¥{amount} | 账户: {account}",
             arg=url,
             uid="cat2_direct",
-            icon="icon.png",
+            icon=icon_path,
             valid=True
         )
     else:
+        # 预加载所有二级分类的图标
+        preload_icons(wf, sub_categories, icons_list)
+        
         for cat2 in sub_categories:
             # 使用二级分类名称（iCost 的 category 参数用二级分类）
             url = build_url(record_type, amount, account, cat2, remark)
+            icon_path = get_icon_for_item(wf, cat2, icons_list)
+            
             wf.add_item(
-                title=f"📝 {cat2}",
+                title=f"{cat2}",
                 subtitle=f"{type_label} ¥{amount} | {account} > {category1} > {cat2}",
                 arg=url,
                 uid=f"cat2_{cat2}",
-                icon="icon.png",
+                icon=icon_path,
                 valid=True
             )
     
@@ -115,6 +131,3 @@ def main(wf):
 if __name__ == "__main__":
     wf = Workflow3()
     sys.exit(wf.run(main))
-
-if __name__ == "__main__":
-    main()

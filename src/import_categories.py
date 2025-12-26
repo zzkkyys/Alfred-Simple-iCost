@@ -9,13 +9,19 @@ import json
 import sys
 import os
 
-WORKFLOW_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(WORKFLOW_DIR, "icost_data.json")
+# 添加 workflow 包路径
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-def load_data():
-    """加载现有数据"""
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+from workflow import Workflow3
+
+DATA_FILENAME = "icost_data.json"
+
+
+def load_data(wf):
+    """加载现有数据（从 cache 目录）"""
+    data_file = wf.cachefile(DATA_FILENAME)
+    if os.path.exists(data_file):
+        with open(data_file, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {
         "accounts": [],
@@ -23,12 +29,15 @@ def load_data():
         "income_categories": {}
     }
 
-def save_data(data):
-    """保存数据"""
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
+
+def save_data(wf, data):
+    """保存数据（到 cache 目录）"""
+    data_file = wf.cachefile(DATA_FILENAME)
+    with open(data_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-def import_from_excel(file_path):
+
+def import_from_excel(wf, file_path):
     """从 Excel 文件导入分类"""
     try:
         import openpyxl
@@ -116,7 +125,7 @@ def import_from_excel(file_path):
         wb.close()
         
         # 合并现有数据
-        existing_data = load_data()
+        existing_data = load_data(wf)
         
         # 合并账户
         all_accounts = list(set(list(existing_data.get("accounts", [])) + list(accounts)))
@@ -144,8 +153,8 @@ def import_from_excel(file_path):
         
         existing_data["accounts"] = all_accounts
         
-        # 保存数据
-        save_data(existing_data)
+        # 保存数据到 cache 目录
+        save_data(wf, existing_data)
         
         expense_count = sum(len(v) for v in expense_categories.values())
         income_count = sum(len(v) for v in income_categories.values())
@@ -155,11 +164,9 @@ def import_from_excel(file_path):
     except Exception as e:
         return None, f"导入失败: {str(e)}"
 
-def main():
+def main(wf):
     # 获取用户输入的文件路径
-    query = sys.argv[1].strip() if len(sys.argv) > 1 else ""
-    
-    items = []
+    query = wf.args[0].strip() if wf.args else ""
     
     if query:
         # 用户提供了文件路径
@@ -169,42 +176,43 @@ def main():
         file_path = os.path.expanduser(file_path)
         
         if os.path.exists(file_path):
-            items.append({
-                "uid": "import",
-                "title": f"📥 导入分类: {os.path.basename(file_path)}",
-                "subtitle": f"从 Excel 文件导入分类数据",
-                "arg": file_path,
-                "icon": {"path": "icon.png"},
-                "valid": True
-            })
+            wf.add_item(
+                title=f"📥 导入分类: {os.path.basename(file_path)}",
+                subtitle=f"从 Excel 文件导入分类数据",
+                arg=file_path,
+                uid="import",
+                icon="icon.png",
+                valid=True
+            )
         else:
-            items.append({
-                "uid": "not_found",
-                "title": "⚠️ 文件不存在",
-                "subtitle": f"请检查路径: {file_path}",
-                "valid": False,
-                "icon": {"path": "icon.png"}
-            })
+            wf.add_item(
+                title="⚠️ 文件不存在",
+                subtitle=f"请检查路径: {file_path}",
+                uid="not_found",
+                icon="icon.png",
+                valid=False
+            )
     else:
         # 显示使用说明
-        items.append({
-            "uid": "help",
-            "title": "📥 导入 iCost 分类",
-            "subtitle": "请输入 Excel 文件路径，或将文件拖拽到这里",
-            "valid": False,
-            "icon": {"path": "icon.png"}
-        })
+        wf.add_item(
+            title="📥 导入 iCost 分类",
+            subtitle="请输入 Excel 文件路径，或将文件拖拽到这里",
+            uid="help",
+            icon="icon.png",
+            valid=False
+        )
         
-        items.append({
-            "uid": "tip",
-            "title": "💡 提示",
-            "subtitle": "Excel 文件需包含: 类型、一级分类、二级分类 列",
-            "valid": False,
-            "icon": {"path": "icon.png"}
-        })
+        wf.add_item(
+            title="💡 提示",
+            subtitle="Excel 文件需包含: 类型、一级分类、二级分类 列",
+            uid="tip",
+            icon="icon.png",
+            valid=False
+        )
     
-    output = {"items": items}
-    print(json.dumps(output, ensure_ascii=False))
+    wf.send_feedback()
+
 
 if __name__ == "__main__":
-    main()
+    wf = Workflow3()
+    sys.exit(wf.run(main))
