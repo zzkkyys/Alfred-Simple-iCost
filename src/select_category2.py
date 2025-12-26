@@ -10,37 +10,37 @@ import sys
 import os
 import urllib.parse
 
+# 添加 workflow 包路径
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from workflow import Workflow3
+
 WORKFLOW_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(WORKFLOW_DIR, "icost_data.json")
+
+# 记账成功后的回调 URL（调用快捷指令"记账提醒"）
+X_SUCCESS_URL = "shortcuts://run-shortcut?name=iCostNotify"
+X_ERROR_URL = "shortcuts://run-shortcut?name=iCostError&"
 
 def load_data():
     """加载分类和账户数据"""
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
-    return {
-        "accounts": ["微信", "支付宝", "现金", "银行卡"],
-        "expense_categories": {
-            "餐饮": ["早餐", "午餐", "晚餐", "零食", "饮料"],
-            "交通": ["公交", "地铁", "打车", "加油"],
-            "购物": ["日用品", "服饰", "数码", "其他"],
-            "娱乐": ["电影", "游戏", "运动", "其他"]
-        },
-        "income_categories": {
-            "工资": ["基本工资", "奖金", "加班费"],
-            "投资": ["股票", "基金", "理财"],
-            "其他": ["红包", "报销", "兼职"]
-        }
-    }
+    with open("default_icost_data.json", 'r', encoding='utf-8') as f:
+        return json.load(f)
+
 
 def build_url(record_type, amount, account, category, remark=""):
-    """构建 iCost URL Scheme"""
+    """构建 iCost x-callback-url Scheme（进行 URL 编码）"""
     base_url = f"iCost://{record_type}"
     
     params = {
         "amount": amount,
         "account": account,
-        "category": category
+        "category": category,
+        "x-success": X_SUCCESS_URL,
+        "x-error": X_ERROR_URL
     }
     
     if remark:
@@ -49,12 +49,20 @@ def build_url(record_type, amount, account, category, remark=""):
     query_string = urllib.parse.urlencode(params)
     return f"{base_url}?{query_string}"
 
-def main():
-    # 接收前一步传来的数据
-    input_data = sys.argv[1] if len(sys.argv) > 1 else "{}"
+
+def main(wf):
+    # 接收前一步传来的数据（支持多种方式）
+    input_data = ""
+    
+    if wf.args:
+        input_data = wf.args[0]
+    elif not sys.stdin.isatty():
+        input_data = sys.stdin.read().strip()
+    
+    wf.logger.debug(f"Received input: {input_data}")
     
     try:
-        data = json.loads(input_data)
+        data = json.loads(input_data) if input_data else {}
     except json.JSONDecodeError:
         data = {}
     
@@ -77,34 +85,36 @@ def main():
     # 获取二级分类
     sub_categories = categories.get(category1, [])
     
-    items = []
-    
     if not sub_categories:
         # 如果没有二级分类，直接使用一级分类
         url = build_url(record_type, amount, account, category1, remark)
-        items.append({
-            "uid": f"cat2_direct",
-            "title": f"✅ 直接记账: {category1}",
-            "subtitle": f"{type_label} ¥{amount} | 账户: {account}",
-            "arg": url,
-            "icon": {"path": "icon.png"},
-            "valid": True
-        })
+        wf.add_item(
+            title=f"✅ 直接记账: {category1}",
+            subtitle=f"{type_label} ¥{amount} | 账户: {account}",
+            arg=url,
+            uid="cat2_direct",
+            icon="icon.png",
+            valid=True
+        )
     else:
         for cat2 in sub_categories:
             # 使用二级分类名称（iCost 的 category 参数用二级分类）
             url = build_url(record_type, amount, account, cat2, remark)
-            items.append({
-                "uid": f"cat2_{cat2}",
-                "title": f"📝 {cat2}",
-                "subtitle": f"{type_label} ¥{amount} | {account} > {category1} > {cat2}",
-                "arg": url,
-                "icon": {"path": "icon.png"},
-                "valid": True
-            })
+            wf.add_item(
+                title=f"📝 {cat2}",
+                subtitle=f"{type_label} ¥{amount} | {account} > {category1} > {cat2}",
+                arg=url,
+                uid=f"cat2_{cat2}",
+                icon="icon.png",
+                valid=True
+            )
     
-    output = {"items": items}
-    print(json.dumps(output, ensure_ascii=False))
+    wf.send_feedback()
+
+
+if __name__ == "__main__":
+    wf = Workflow3()
+    sys.exit(wf.run(main))
 
 if __name__ == "__main__":
     main()

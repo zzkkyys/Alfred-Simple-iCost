@@ -8,35 +8,37 @@ import json
 import sys
 import os
 
+# 添加 workflow 包路径
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from workflow import Workflow3
+
 WORKFLOW_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(WORKFLOW_DIR, "icost_data.json")
+
 
 def load_data():
     """加载分类和账户数据"""
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
-    return {
-        "accounts": ["微信", "支付宝", "现金", "银行卡"],
-        "expense_categories": {
-            "餐饮": ["早餐", "午餐", "晚餐", "零食", "饮料"],
-            "交通": ["公交", "地铁", "打车", "加油"],
-            "购物": ["日用品", "服饰", "数码", "其他"],
-            "娱乐": ["电影", "游戏", "运动", "其他"]
-        },
-        "income_categories": {
-            "工资": ["基本工资", "奖金", "加班费"],
-            "投资": ["股票", "基金", "理财"],
-            "其他": ["红包", "报销", "兼职"]
-        }
-    }
+    with open("default_icost_data.json", 'r', encoding='utf-8') as f:
+        return json.load(f)
 
-def main():
-    # 接收前一步传来的数据
-    input_data = sys.argv[1] if len(sys.argv) > 1 else "{}"
+
+def main(wf):
+    # 接收前一步传来的数据（支持多种方式）
+    input_data = ""
+    
+    if wf.args:
+        input_data = wf.args[0]
+    elif not sys.stdin.isatty():
+        input_data = sys.stdin.read().strip()
+    
+    wf.logger.debug(f"Received input: {input_data}")
     
     try:
-        data = json.loads(input_data)
+        data = json.loads(input_data) if input_data else {}
     except json.JSONDecodeError:
         data = {}
     
@@ -55,25 +57,22 @@ def main():
         categories = config.get("income_categories", {})
         type_label = "收入"
     
-    items = []
-    
     if not categories:
-        items.append({
-            "uid": "no_category",
-            "title": "⚠️ 暂无分类数据",
-            "subtitle": "请先使用 icost:import 命令导入分类",
-            "valid": False,
-            "icon": {"path": "icon.png"}
-        })
+        wf.add_item(
+            title="⚠️ 暂无分类数据",
+            subtitle="请先使用 icost:import 命令导入分类",
+            uid="no_category",
+            icon="icon.png",
+            valid=False
+        )
     else:
         for cat1 in categories.keys():
             sub_categories = categories.get(cat1, [])
             sub_count = len(sub_categories)
-            items.append({
-                "uid": f"cat1_{cat1}",
-                "title": f"📁 {cat1}",
-                "subtitle": f"{type_label} ¥{amount} | 账户: {account} | 包含 {sub_count} 个子分类",
-                "arg": json.dumps({
+            wf.add_item(
+                title=f"📁 {cat1}",
+                subtitle=f"{type_label} ¥{amount} | 账户: {account} | 包含 {sub_count} 个子分类",
+                arg=json.dumps({
                     "action": "select_category2",
                     "type": record_type,
                     "amount": amount,
@@ -81,12 +80,14 @@ def main():
                     "account": account,
                     "category1": cat1
                 }),
-                "icon": {"path": "icon.png"},
-                "valid": True
-            })
+                uid=f"cat1_{cat1}",
+                icon="icon.png",
+                valid=True
+            )
     
-    output = {"items": items}
-    print(json.dumps(output, ensure_ascii=False))
+    wf.send_feedback()
+
 
 if __name__ == "__main__":
-    main()
+    wf = Workflow3()
+    sys.exit(wf.run(main))

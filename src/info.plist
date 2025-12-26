@@ -5,22 +5,9 @@
 	<key>bundleid</key>
 	<string>com.ay.icost.workflow</string>
 	<key>category</key>
-	<string>Productivity</string>
+	<string>ay</string>
 	<key>connections</key>
 	<dict>
-		<key>0A1B2C3D-ACCT-0000-0000-000000000002</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>0A1B2C3D-CAT1-0000-0000-000000000003</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
 		<key>0A1B2C3D-CAT1-0000-0000-000000000003</key>
 		<array>
 			<dict>
@@ -77,7 +64,33 @@
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>0A1B2C3D-ACCT-0000-0000-000000000002</string>
+				<string>CA32F696-738A-4386-A755-384EE41A39FB</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>6BF2DABE-7075-4735-8AC9-FF7A4641F429</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>0A1B2C3D-CAT1-0000-0000-000000000003</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>CA32F696-738A-4386-A755-384EE41A39FB</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>6BF2DABE-7075-4735-8AC9-FF7A4641F429</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -101,7 +114,126 @@
 			<key>config</key>
 			<dict>
 				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<false/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string></string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
 				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string></string>
+				<key>script</key>
+				<string>python3 select_category1.py "{query}"</string>
+				<key>scriptargtype</key>
+				<integer>0</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string></string>
+				<key>title</key>
+				<string>选择一级分类</string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>0A1B2C3D-CAT1-0000-0000-000000000003</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>browser</key>
+				<string></string>
+				<key>skipqueryencode</key>
+				<true/>
+				<key>skipvarencode</key>
+				<true/>
+				<key>spaces</key>
+				<string></string>
+				<key>url</key>
+				<string>{query}</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.openurl</string>
+			<key>uid</key>
+			<string>0A1B2C3D-OPEN-0000-0000-000000000005</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<false/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string></string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string></string>
+				<key>script</key>
+				<string>python3 select_category2.py "{query}"</string>
+				<key>scriptargtype</key>
+				<integer>0</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string></string>
+				<key>title</key>
+				<string>选择二级分类</string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>0A1B2C3D-CAT2-0000-0000-000000000004</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
 				<key>alfredfiltersresultsmatchmode</key>
 				<integer>0</integer>
 				<key>argumenttreatemptyqueryasnil</key>
@@ -127,7 +259,7 @@
 				<key>script</key>
 				<string>python3 icost_main.py "{query}"</string>
 				<key>scriptargtype</key>
-				<integer>1</integer>
+				<integer>0</integer>
 				<key>scriptfile</key>
 				<string></string>
 				<key>subtext</key>
@@ -149,119 +281,56 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>alfredfiltersresults</key>
-				<true/>
-				<key>alfredfiltersresultsmatchmode</key>
-				<integer>0</integer>
-				<key>argumenttreatemptyqueryasnil</key>
+				<key>concurrently</key>
 				<false/>
-				<key>argumenttrimmode</key>
-				<integer>0</integer>
-				<key>argumenttype</key>
-				<integer>1</integer>
 				<key>escaping</key>
 				<integer>102</integer>
-				<key>keyword</key>
-				<string></string>
-				<key>queuedelaycustom</key>
-				<integer>3</integer>
-				<key>queuedelayimmediatelyinitially</key>
-				<true/>
-				<key>queuedelaymode</key>
-				<integer>0</integer>
-				<key>queuemode</key>
-				<integer>1</integer>
-				<key>runningsubtext</key>
-				<string></string>
 				<key>script</key>
-				<string>python3 select_category1.py '{query}'</string>
+				<string>python3 select_account.py "{query}"</string>
 				<key>scriptargtype</key>
-				<integer>1</integer>
+				<integer>0</integer>
 				<key>scriptfile</key>
 				<string></string>
-				<key>subtext</key>
-				<string></string>
-				<key>title</key>
-				<string>选择一级分类</string>
 				<key>type</key>
-				<integer>0</integer>
-				<key>withspace</key>
-				<false/>
+				<integer>11</integer>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.input.scriptfilter</string>
+			<string>alfred.workflow.action.script</string>
 			<key>uid</key>
-			<string>0A1B2C3D-CAT1-0000-0000-000000000003</string>
+			<string>CA32F696-738A-4386-A755-384EE41A39FB</string>
 			<key>version</key>
-			<integer>3</integer>
+			<integer>2</integer>
 		</dict>
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>alfredfiltersresults</key>
+				<key>columncount</key>
+				<integer>4</integer>
+				<key>filterable</key>
 				<true/>
-				<key>alfredfiltersresultsmatchmode</key>
-				<integer>0</integer>
-				<key>argumenttreatemptyqueryasnil</key>
+				<key>fixedorder</key>
 				<false/>
-				<key>argumenttrimmode</key>
-				<integer>0</integer>
-				<key>argumenttype</key>
-				<integer>1</integer>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>keyword</key>
+				<key>imageaspect</key>
+				<integer>2</integer>
+				<key>inputfile</key>
 				<string></string>
-				<key>queuedelaycustom</key>
-				<integer>3</integer>
-				<key>queuedelayimmediatelyinitially</key>
+				<key>inputtype</key>
+				<integer>0</integer>
+				<key>loadingtext</key>
+				<string></string>
+				<key>showsubtitles</key>
 				<true/>
-				<key>queuedelaymode</key>
-				<integer>0</integer>
-				<key>queuemode</key>
-				<integer>1</integer>
-				<key>runningsubtext</key>
-				<string></string>
-				<key>script</key>
-				<string>python3 select_account.py '{query}'</string>
-				<key>scriptargtype</key>
-				<integer>1</integer>
-				<key>scriptfile</key>
-				<string></string>
-				<key>subtext</key>
-				<string></string>
-				<key>title</key>
-				<string>选择账户</string>
-				<key>type</key>
-				<integer>0</integer>
-				<key>withspace</key>
+				<key>showtitles</key>
+				<true/>
+				<key>subtitlesinfooter</key>
+				<false/>
+				<key>titlesinfooter</key>
 				<false/>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.input.scriptfilter</string>
+			<string>alfred.workflow.userinterface.grid</string>
 			<key>uid</key>
-			<string>0A1B2C3D-ACCT-0000-0000-000000000002</string>
-			<key>version</key>
-			<integer>3</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>browser</key>
-				<string></string>
-				<key>skipqueryencode</key>
-				<false/>
-				<key>skipvarencode</key>
-				<false/>
-				<key>spaces</key>
-				<string></string>
-				<key>url</key>
-				<string>{query}</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.openurl</string>
-			<key>uid</key>
-			<string>0A1B2C3D-OPEN-0000-0000-000000000005</string>
+			<string>6BF2DABE-7075-4735-8AC9-FF7A4641F429</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -269,56 +338,7 @@
 			<key>config</key>
 			<dict>
 				<key>alfredfiltersresults</key>
-				<true/>
-				<key>alfredfiltersresultsmatchmode</key>
-				<integer>0</integer>
-				<key>argumenttreatemptyqueryasnil</key>
 				<false/>
-				<key>argumenttrimmode</key>
-				<integer>0</integer>
-				<key>argumenttype</key>
-				<integer>1</integer>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>keyword</key>
-				<string></string>
-				<key>queuedelaycustom</key>
-				<integer>3</integer>
-				<key>queuedelayimmediatelyinitially</key>
-				<true/>
-				<key>queuedelaymode</key>
-				<integer>0</integer>
-				<key>queuemode</key>
-				<integer>1</integer>
-				<key>runningsubtext</key>
-				<string></string>
-				<key>script</key>
-				<string>python3 select_category2.py '{query}'</string>
-				<key>scriptargtype</key>
-				<integer>1</integer>
-				<key>scriptfile</key>
-				<string></string>
-				<key>subtext</key>
-				<string></string>
-				<key>title</key>
-				<string>选择二级分类</string>
-				<key>type</key>
-				<integer>0</integer>
-				<key>withspace</key>
-				<false/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.input.scriptfilter</string>
-			<key>uid</key>
-			<string>0A1B2C3D-CAT2-0000-0000-000000000004</string>
-			<key>version</key>
-			<integer>3</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>alfredfiltersresults</key>
-				<true/>
 				<key>alfredfiltersresultsmatchmode</key>
 				<integer>0</integer>
 				<key>argumenttreatemptyqueryasnil</key>
@@ -344,7 +364,7 @@
 				<key>script</key>
 				<string>python3 import_categories.py "{query}"</string>
 				<key>scriptargtype</key>
-				<integer>1</integer>
+				<integer>0</integer>
 				<key>scriptfile</key>
 				<string></string>
 				<key>subtext</key>
@@ -371,9 +391,9 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>python3 do_import.py "{query}"</string>
+				<string>/opt/homebrew/anaconda3/bin/python do_import.py "{query}"</string>
 				<key>scriptargtype</key>
-				<integer>1</integer>
+				<integer>0</integer>
 				<key>scriptfile</key>
 				<string></string>
 				<key>type</key>
@@ -409,64 +429,169 @@
 		</dict>
 	</array>
 	<key>readme</key>
-	<string></string>
+	<string># iCost 记账 Alfred Workflow
+
+使用 iCost 的 URL Scheme 快速记账，支持消费和收入。
+
+## 功能特点
+
+- 💸 **消费记账**：快速记录支出
+- 💰 **收入记账**：快速记录收入
+- 📱 **账户选择**：选择付款/收款账户
+- 📁 **分类选择**：支持一级分类和二级分类
+- 📥 **Excel 导入**：从 iCost 导出的账单导入分类
+
+## 使用方法
+
+### 1. 记账（关键词：`ic`）
+
+```
+ic 金额 [备注]
+```
+
+**示例：**
+- `ic 50` - 记录 50 元
+- `ic 35.5 午餐` - 记录 35.5 元，备注"午餐"
+
+**流程：**
+1. 输入金额后回车
+2. 选择"消费"或"收入"
+3. 选择付款/收款账户
+4. 选择一级分类
+5. 选择二级分类
+6. 自动打开 iCost 完成记账
+
+### 2. 导入分类（关键词：`icost:import`）
+
+```
+icost:import /path/to/your/icost_export.xlsx
+```
+
+**说明：**
+- 从 iCost 导出的 Excel 账单文件中读取分类
+- Excel 文件需包含以下列：类型、一级分类、二级分类、账户
+- 导入后会自动合并到现有分类数据库
+
+## 文件结构
+
+| 文件 | 说明 |
+|------|------|
+| `icost_main.py` | 主入口脚本 |
+| `select_account.py` | 账户选择 |
+| `select_category1.py` | 一级分类选择 |
+| `select_category2.py` | 二级分类选择 |
+| `import_categories.py` | 导入分类界面 |
+| `do_import.py` | 执行导入操作 |
+| `icost_data.json` | 分类和账户数据 |
+
+## iCost URL Scheme 格式
+
+### 支出
+```
+iCost://expense?amount=金额&amp;account=账户&amp;category=分类&amp;remark=备注
+```
+
+### 收入
+```
+iCost://income?amount=金额&amp;account=账户&amp;category=分类&amp;remark=备注
+```
+
+## 依赖
+
+- Python 3
+- openpyxl（仅导入 Excel 时需要）
+
+安装 openpyxl：
+```bash
+pip3 install openpyxl
+```
+
+## 自定义分类
+
+编辑 `icost_data.json` 文件可手动添加或修改分类和账户：
+
+```json
+{
+  "accounts": ["微信", "支付宝", "现金"],
+  "expense_categories": {
+    "餐饮": ["早餐", "午餐", "晚餐"],
+    "交通": ["公交", "地铁", "打车"]
+  },
+  "income_categories": {
+    "工资": ["基本工资", "奖金"],
+    "其他": ["红包", "报销"]
+  }
+}
+```
+</string>
 	<key>uidata</key>
 	<dict>
-		<key>0A1B2C3D-ACCT-0000-0000-000000000002</key>
-		<dict>
-			<key>xpos</key>
-			<real>250</real>
-			<key>ypos</key>
-			<real>50</real>
-		</dict>
 		<key>0A1B2C3D-CAT1-0000-0000-000000000003</key>
 		<dict>
 			<key>xpos</key>
-			<real>450</real>
+			<real>980.0</real>
 			<key>ypos</key>
-			<real>50</real>
+			<real>40.0</real>
 		</dict>
 		<key>0A1B2C3D-CAT2-0000-0000-000000000004</key>
 		<dict>
 			<key>xpos</key>
-			<real>650</real>
+			<real>1180.0</real>
 			<key>ypos</key>
-			<real>50</real>
+			<real>40.0</real>
 		</dict>
 		<key>0A1B2C3D-DOIT-0000-0000-000000000011</key>
 		<dict>
 			<key>xpos</key>
-			<real>250</real>
+			<real>250.0</real>
 			<key>ypos</key>
-			<real>200</real>
+			<real>200.0</real>
 		</dict>
 		<key>0A1B2C3D-IMPT-0000-0000-000000000010</key>
 		<dict>
 			<key>xpos</key>
-			<real>50</real>
+			<real>50.0</real>
 			<key>ypos</key>
-			<real>200</real>
+			<real>200.0</real>
 		</dict>
 		<key>0A1B2C3D-MAIN-0000-0000-000000000001</key>
 		<dict>
 			<key>xpos</key>
-			<real>50</real>
+			<real>50.0</real>
 			<key>ypos</key>
-			<real>50</real>
+			<real>50.0</real>
 		</dict>
 		<key>0A1B2C3D-NOTI-0000-0000-000000000012</key>
 		<dict>
 			<key>xpos</key>
-			<real>450</real>
+			<real>450.0</real>
 			<key>ypos</key>
-			<real>200</real>
+			<real>200.0</real>
 		</dict>
 		<key>0A1B2C3D-OPEN-0000-0000-000000000005</key>
 		<dict>
 			<key>xpos</key>
-			<real>850</real>
+			<real>1380.0</real>
 			<key>ypos</key>
-			<real>50</real>
+			<real>40.0</real>
+		</dict>
+		<key>6BF2DABE-7075-4735-8AC9-FF7A4641F429</key>
+		<dict>
+			<key>note</key>
+			<string>以grid view显示账户</string>
+			<key>xpos</key>
+			<real>445.0</real>
+			<key>ypos</key>
+			<real>50.0</real>
+		</dict>
+		<key>CA32F696-738A-4386-A755-384EE41A39FB</key>
+		<dict>
+			<key>note</key>
+			<string>1. 选择账户</string>
+			<key>xpos</key>
+			<real>245.0</real>
+			<key>ypos</key>
+			<real>50.0</real>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
