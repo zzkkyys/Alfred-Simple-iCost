@@ -14,7 +14,7 @@ import zlib
 PLIST_PATH = 'src/info.plist'
 README_PATH = 'README.md'
 ZIP_PATH = "./src" ### or "./"
-ZIP_OUTPUT = "Alfred-PDF-OPERATIONS-{version}.alfredworkflow"
+ZIP_OUTPUT = "Alfred-Simple-iCost-{version}.alfredworkflow"
 exclude = {'.git', '__pycache__', '.DS_Store'}
 
 
