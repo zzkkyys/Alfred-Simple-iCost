@@ -12,7 +12,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from workflow import Workflow3
-from icon_manager import get_icon_for_item, load_icons_list, preload_icons
+from icon_manager import get_icon_for_item, preload_icons, flush_download_queue
 
 DATA_FILENAME = "icost_data.json"
 
@@ -71,16 +71,15 @@ def main(wf):
             valid=False
         )
     else:
-        # 预加载图标列表
-        icons_list = load_icons_list()
+        # 预加载图标
         category_names = list(categories.keys())
-        preload_icons(wf, category_names, icons_list)
+        preload_icons(wf, category_names)
         
         for cat1 in categories.keys():
             sub_categories = categories.get(cat1, [])
             sub_count = len(sub_categories)
             # 获取匹配的图标
-            icon_path = get_icon_for_item(wf, cat1, icons_list)
+            icon_path = get_icon_for_item(wf, cat1)
             
             wf.add_item(
                 title=f"{cat1}",
@@ -97,6 +96,9 @@ def main(wf):
                 icon=icon_path,
                 valid=True
             )
+    
+    # 启动批量下载
+    flush_download_queue(wf)
     
     wf.send_feedback()
 

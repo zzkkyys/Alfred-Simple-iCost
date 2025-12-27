@@ -10,9 +10,9 @@ import json
 import sys
 import re
 import urllib.parse
-from typing import Optional
+from typing import Optional, Dict
 
-from workflow.background import run_in_background
+from workflow.background import run_in_background, is_running
 
 # GitHub 仓库信息
 GITHUB_REPO = "zzkkyys/Alfred-Simple-iCost"
@@ -27,6 +27,9 @@ DOWNLOAD_SCRIPT = os.path.join(MODULE_DIR, "download_icons.py")
 
 # 默认图标
 DEFAULT_ICON = "icon.png"
+
+# 缓存：图标索引（避免每次都遍历）
+_icons_index: Optional[Dict[str, str]] = None
 
 
 def normalize_item_name(item_name: str) -> str:
@@ -61,35 +64,18 @@ def load_icons_list() -> list:
     return []
 
 
-def find_icon_for_item(item_name: str, icons_list: Optional[list] = None) -> Optional[str]:
+def build_icons_index(icons_list: list) -> Dict[str, str]:
     """
-    为给定的 item 名称查找匹配的图标文件名
-    
-    匹配规则：
-    1. 文件名包含 item 名称（不区分大小写）
-    2. 优先匹配完全包含的
-    3. 优先选择带 color_ 前缀的彩色图标
-    
-    Args:
-        item_name: 要匹配的名称（如账户名、分类名）
-        icons_list: 图标列表，如果为 None 则从文件加载
+    构建图标索引，将关键词映射到图标文件名
+    只在首次调用时构建，后续使用缓存
     
     Returns:
-        匹配的图标文件名，如果没有找到则返回 None
+        Dict[关键词, 图标文件名]
     """
-    if icons_list is None:
-        icons_list = load_icons_list()
-    
-    if not icons_list or not item_name:
-        return None
-    
-    # 规范化名称：去掉末尾数字（如"餐饮1" -> "餐饮"）
-    normalized_name = normalize_item_name(item_name)
-    item_lower = normalized_name.lower()
-    matches = []
+    index = {}
     
     for icon_name in icons_list:
-        # 从文件名中提取关键词（去除后缀和 _Normal@2x 等标记）
+        # 从文件名中提取关键词
         base_name = icon_name.lower()
         # 移除常见后缀
         for suffix in ['_normal@3x.png', '_normal@2x.png', '_normal.png', '.png', '.jpg', '.icns']:
@@ -97,29 +83,63 @@ def find_icon_for_item(item_name: str, icons_list: Optional[list] = None) -> Opt
                 base_name = base_name[:-len(suffix)]
                 break
         
-        # 检查是否匹配
-        if item_lower in base_name or base_name in item_lower:
-            matches.append(icon_name)
+        # 提取关键词（移除前缀如 color_, account_）
+        keyword = base_name
+        for prefix in ['color_', 'account_', 'icon_']:
+            if keyword.startswith(prefix):
+                keyword = keyword[len(prefix):]
+                break
+        
+        # 存储到索引（优先 color_ 前缀）
+        if keyword not in index:
+            index[keyword] = icon_name
+        elif icon_name.lower().startswith('color_') and not index[keyword].lower().startswith('color_'):
+            # 优先使用 color_ 前缀的图标
+            index[keyword] = icon_name
     
-    if not matches:
+    return index
+
+
+def get_icons_index() -> Dict[str, str]:
+    """获取图标索引（使用缓存）"""
+    global _icons_index
+    if _icons_index is None:
+        icons_list = load_icons_list()
+        _icons_index = build_icons_index(icons_list)
+    return _icons_index
+
+
+def find_icon_for_item(item_name: str, icons_list: Optional[list] = None) -> Optional[str]:
+    """
+    为给定的 item 名称查找匹配的图标文件名（使用索引快速查找）
+    
+    Args:
+        item_name: 要匹配的名称（如账户名、分类名）
+        icons_list: 图标列表（已弃用，保留兼容性）
+    
+    Returns:
+        匹配的图标文件名，如果没有找到则返回 None
+    """
+    if not item_name:
         return None
     
-    # 优先选择带 color_ 前缀的彩色图标
-    color_matches = [m for m in matches if m.lower().startswith('color_')]
-    if color_matches:
-        # 优先选择更短的匹配（更精确）
-        color_matches.sort(key=len)
-        return color_matches[0]
+    # 规范化名称：去掉末尾数字（如"餐饮1" -> "餐饮"）
+    normalized_name = normalize_item_name(item_name)
+    item_lower = normalized_name.lower()
     
-    # 其次选择带 account_ 前缀的账户图标
-    account_matches = [m for m in matches if m.lower().startswith('account_')]
-    if account_matches:
-        account_matches.sort(key=len)
-        return account_matches[0]
+    # 使用索引快速查找
+    index = get_icons_index()
     
-    # 返回最短的匹配
-    matches.sort(key=len)
-    return matches[0]
+    # 精确匹配
+    if item_lower in index:
+        return index[item_lower]
+    
+    # 部分匹配（关键词包含在 item 中，或 item 包含在关键词中）
+    for keyword, icon_name in index.items():
+        if item_lower in keyword or keyword in item_lower:
+            return icon_name
+    
+    return None
 
 
 def get_icon_cache_path(wf, icon_filename: str) -> str:
@@ -133,25 +153,53 @@ def get_icon_url(icon_filename: str) -> str:
     return f"{GITHUB_RAW_URL}/{encoded_filename}"
 
 
-def start_icon_download(wf, icon_filename: str, cache_path: str):
+# 待下载队列（收集本次运行需要下载的图标）
+_pending_downloads: list = []
+
+
+def queue_icon_download(wf, icon_filename: str, cache_path: str):
     """
-    启动单个图标的后台下载任务
+    将图标加入下载队列（不立即下载）
     
     Args:
         wf: Workflow3 实例
         icon_filename: 图标文件名
         cache_path: 缓存路径
     """
-    # 使用图标文件名作为任务名（确保唯一性）
-    # 移除特殊字符避免问题
-    task_name = f"dl_{icon_filename.replace('/', '_').replace(' ', '_')}"
-    
-    # 构建下载 URL
+    global _pending_downloads
     icon_url = get_icon_url(icon_filename)
+    _pending_downloads.append((icon_url, cache_path))
+
+
+def flush_download_queue(wf):
+    """
+    启动后台任务下载所有队列中的图标（批量下载）
+    """
+    global _pending_downloads
     
-    # 使用 run_in_background 启动下载脚本
-    cmd = [sys.executable, DOWNLOAD_SCRIPT, icon_url, cache_path]
-    run_in_background(task_name, cmd)
+    if not _pending_downloads:
+        return
+    
+    # 检查是否已有下载任务在运行
+    if is_running("icon_batch_download"):
+        return
+    
+    # 将下载任务写入临时文件
+    tasks_file = wf.cachefile("icon_download_tasks.json")
+    tasks = [{"url": url, "path": path} for url, path in _pending_downloads]
+    
+    with open(tasks_file, 'w', encoding='utf-8') as f:
+        json.dump(tasks, f, ensure_ascii=False)
+    
+    # 启动批量下载脚本
+    cmd = [sys.executable, DOWNLOAD_SCRIPT, "--batch", tasks_file]
+    run_in_background("icon_batch_download", cmd)
+    
+    # 清空队列
+    _pending_downloads = []
+    
+    # 设置自动重新运行
+    wf.rerun = 1.0
 
 
 def get_icon_for_item(wf, item_name: str, icons_list: Optional[list] = None) -> str:
@@ -159,12 +207,12 @@ def get_icon_for_item(wf, item_name: str, icons_list: Optional[list] = None) -> 
     获取 item 对应的图标路径
     
     如果缓存中存在则直接返回缓存路径
-    如果不存在则触发后台下载并返回默认图标
+    如果不存在则加入下载队列并返回默认图标
     
     Args:
         wf: Workflow3 实例
         item_name: 要匹配的名称
-        icons_list: 图标列表
+        icons_list: 图标列表（已弃用）
     
     Returns:
         图标路径（缓存路径或默认图标）
@@ -181,11 +229,8 @@ def get_icon_for_item(wf, item_name: str, icons_list: Optional[list] = None) -> 
     if os.path.exists(cache_path):
         return cache_path
     
-    # 触发后台下载
-    start_icon_download(wf, icon_filename, cache_path)
-    
-    # 设置 1 秒后自动重新运行，以便显示下载好的图标
-    wf.rerun = 1.0
+    # 加入下载队列（不立即下载）
+    queue_icon_download(wf, icon_filename, cache_path)
     
     # 返回默认图标
     return DEFAULT_ICON
@@ -194,28 +239,21 @@ def get_icon_for_item(wf, item_name: str, icons_list: Optional[list] = None) -> 
 def preload_icons(wf, item_names: list, icons_list: Optional[list] = None):
     """
     预加载多个 item 的图标
-    为每个需要下载的图标启动独立的后台任务
+    收集所有需要下载的图标，最后批量启动下载
     
     Args:
         wf: Workflow3 实例
         item_names: 要预加载的 item 名称列表
-        icons_list: 图标列表
+        icons_list: 图标列表（已弃用）
     """
-    if icons_list is None:
-        icons_list = load_icons_list()
-    
-    has_pending_downloads = False
-    
     for item_name in item_names:
-        icon_filename = find_icon_for_item(item_name, icons_list)
+        icon_filename = find_icon_for_item(item_name)
         
         if icon_filename:
             cache_path = get_icon_cache_path(wf, icon_filename)
             
             if not os.path.exists(cache_path):
-                start_icon_download(wf, icon_filename, cache_path)
-                has_pending_downloads = True
+                queue_icon_download(wf, icon_filename, cache_path)
     
-    # 如果有待下载的图标，设置自动重新运行
-    if has_pending_downloads:
-        wf.rerun = 1.0
+    # 批量启动下载
+    flush_download_queue(wf)

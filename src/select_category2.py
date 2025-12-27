@@ -14,7 +14,7 @@ import urllib.parse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from workflow import Workflow3
-from icon_manager import get_icon_for_item, load_icons_list, preload_icons
+from icon_manager import get_icon_for_item, preload_icons, flush_download_queue
 
 DATA_FILENAME = "icost_data.json"
 
@@ -91,13 +91,10 @@ def main(wf):
     # 获取二级分类
     sub_categories = categories.get(category1, [])
     
-    # 预加载图标列表
-    icons_list = load_icons_list()
-    
     if not sub_categories:
         # 如果没有二级分类，直接使用一级分类
         url = build_url(record_type, amount, account, category1, remark)
-        icon_path = get_icon_for_item(wf, category1, icons_list)
+        icon_path = get_icon_for_item(wf, category1)
         
         wf.add_item(
             title=f"✅ 直接记账: {category1}",
@@ -109,12 +106,12 @@ def main(wf):
         )
     else:
         # 预加载所有二级分类的图标
-        preload_icons(wf, sub_categories, icons_list)
+        preload_icons(wf, sub_categories)
         
         for cat2 in sub_categories:
             # 使用二级分类名称（iCost 的 category 参数用二级分类）
             url = build_url(record_type, amount, account, cat2, remark)
-            icon_path = get_icon_for_item(wf, cat2, icons_list)
+            icon_path = get_icon_for_item(wf, cat2)
             
             wf.add_item(
                 title=f"{cat2}",
@@ -124,6 +121,9 @@ def main(wf):
                 icon=icon_path,
                 valid=True
             )
+    
+    # 启动批量下载
+    flush_download_queue(wf)
     
     wf.send_feedback()
 

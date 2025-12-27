@@ -12,7 +12,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from workflow import Workflow3
-from icon_manager import get_icon_for_item, load_icons_list, preload_icons
+from icon_manager import get_icon_for_item, preload_icons, flush_download_queue
 
 DATA_FILENAME = "icost_data.json"
 
@@ -58,16 +58,14 @@ def main(wf):
     config = load_data(wf)
     accounts = config.get("accounts", ["微信", "支付宝", "现金", "银行卡"])
     
-    # 预加载图标列表
-    icons_list = load_icons_list()
     # 预加载所有账户的图标
-    preload_icons(wf, accounts, icons_list)
+    preload_icons(wf, accounts)
     
     type_label = "消费" if record_type == "expense" else "收入"
     
     for account in accounts:
         # 获取匹配的图标
-        icon_path = get_icon_for_item(wf, account, icons_list)
+        icon_path = get_icon_for_item(wf, account)
         
         wf.add_item(
             title=f"{account}",
@@ -83,6 +81,9 @@ def main(wf):
             icon=icon_path,
             valid=True
         )
+    
+    # 启动批量下载
+    flush_download_queue(wf)
     
     wf.send_feedback()
 
