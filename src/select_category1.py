@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from workflow import Workflow3
 from icon_manager import get_icon_for_item, preload_icons, flush_download_queue
+from habbit import sort_by_frequency
 
 DATA_FILENAME = "icost_data.json"
 
@@ -73,9 +74,13 @@ def main(wf):
     else:
         # 预加载图标
         category_names = list(categories.keys())
+        
+        # 按使用频率排序
+        category_names = sort_by_frequency(wf, category_names, "categories")
+        
         preload_icons(wf, category_names)
         
-        for cat1 in categories.keys():
+        for cat1 in category_names:
             sub_categories = categories.get(cat1, [])
             sub_count = len(sub_categories)
             # 获取匹配的图标

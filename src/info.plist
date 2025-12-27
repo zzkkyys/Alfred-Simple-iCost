@@ -73,6 +73,21 @@
           <false/>
         </dict>
       </array>
+      <key>0A1B2C3D-OPEN-0000-0000-000000000005</key>
+      <array>
+        <dict>
+          <key>destinationuid</key>
+          <string>47698E04-4EC4-4D80-96B6-314E342F5241</string>
+          <key>modifiers</key>
+          <integer>0</integer>
+          <key>modifiersubtext</key>
+          <string/>
+          <key>vitoclose</key>
+          <false/>
+        </dict>
+      </array>
+      <key>47698E04-4EC4-4D80-96B6-314E342F5241</key>
+      <array/>
       <key>55A76E1F-6A12-4F86-BD23-953BF620B7FC</key>
       <array>
         <dict>
@@ -139,27 +154,6 @@
       <dict>
         <key>config</key>
         <dict>
-          <key>browser</key>
-          <string/>
-          <key>skipqueryencode</key>
-          <true/>
-          <key>skipvarencode</key>
-          <true/>
-          <key>spaces</key>
-          <string/>
-          <key>url</key>
-          <string>{query}</string>
-        </dict>
-        <key>type</key>
-        <string>alfred.workflow.action.openurl</string>
-        <key>uid</key>
-        <string>0A1B2C3D-OPEN-0000-0000-000000000005</string>
-        <key>version</key>
-        <integer>1</integer>
-      </dict>
-      <dict>
-        <key>config</key>
-        <dict>
           <key>columncount</key>
           <integer>8</integer>
           <key>filterable</key>
@@ -189,6 +183,83 @@
         <string>0A1B2C3D-CAT2-0000-0000-000000000004</string>
         <key>version</key>
         <integer>1</integer>
+      </dict>
+      <dict>
+        <key>config</key>
+        <dict>
+          <key>browser</key>
+          <string/>
+          <key>skipqueryencode</key>
+          <true/>
+          <key>skipvarencode</key>
+          <true/>
+          <key>spaces</key>
+          <string/>
+          <key>url</key>
+          <string>{query}</string>
+        </dict>
+        <key>type</key>
+        <string>alfred.workflow.action.openurl</string>
+        <key>uid</key>
+        <string>0A1B2C3D-OPEN-0000-0000-000000000005</string>
+        <key>version</key>
+        <integer>1</integer>
+      </dict>
+      <dict>
+        <key>config</key>
+        <dict>
+          <key>columncount</key>
+          <integer>7</integer>
+          <key>filterable</key>
+          <true/>
+          <key>fixedorder</key>
+          <false/>
+          <key>imageaspect</key>
+          <integer>2</integer>
+          <key>inputfile</key>
+          <string/>
+          <key>inputtype</key>
+          <integer>0</integer>
+          <key>loadingtext</key>
+          <string/>
+          <key>showsubtitles</key>
+          <true/>
+          <key>showtitles</key>
+          <true/>
+          <key>subtitlesinfooter</key>
+          <false/>
+          <key>titlesinfooter</key>
+          <false/>
+        </dict>
+        <key>type</key>
+        <string>alfred.workflow.userinterface.grid</string>
+        <key>uid</key>
+        <string>6BF2DABE-7075-4735-8AC9-FF7A4641F429</string>
+        <key>version</key>
+        <integer>1</integer>
+      </dict>
+      <dict>
+        <key>config</key>
+        <dict>
+          <key>concurrently</key>
+          <false/>
+          <key>escaping</key>
+          <integer>102</integer>
+          <key>script</key>
+          <string>python3 select_account.py "{query}"</string>
+          <key>scriptargtype</key>
+          <integer>0</integer>
+          <key>scriptfile</key>
+          <string/>
+          <key>type</key>
+          <integer>11</integer>
+        </dict>
+        <key>type</key>
+        <string>alfred.workflow.action.script</string>
+        <key>uid</key>
+        <string>CA32F696-738A-4386-A755-384EE41A39FB</string>
+        <key>version</key>
+        <integer>2</integer>
       </dict>
       <dict>
         <key>config</key>
@@ -238,62 +309,6 @@
         <string>0A1B2C3D-MAIN-0000-0000-000000000001</string>
         <key>version</key>
         <integer>3</integer>
-      </dict>
-      <dict>
-        <key>config</key>
-        <dict>
-          <key>concurrently</key>
-          <false/>
-          <key>escaping</key>
-          <integer>102</integer>
-          <key>script</key>
-          <string>python3 select_account.py "{query}"</string>
-          <key>scriptargtype</key>
-          <integer>0</integer>
-          <key>scriptfile</key>
-          <string/>
-          <key>type</key>
-          <integer>11</integer>
-        </dict>
-        <key>type</key>
-        <string>alfred.workflow.action.script</string>
-        <key>uid</key>
-        <string>CA32F696-738A-4386-A755-384EE41A39FB</string>
-        <key>version</key>
-        <integer>2</integer>
-      </dict>
-      <dict>
-        <key>config</key>
-        <dict>
-          <key>columncount</key>
-          <integer>7</integer>
-          <key>filterable</key>
-          <true/>
-          <key>fixedorder</key>
-          <false/>
-          <key>imageaspect</key>
-          <integer>2</integer>
-          <key>inputfile</key>
-          <string/>
-          <key>inputtype</key>
-          <integer>0</integer>
-          <key>loadingtext</key>
-          <string/>
-          <key>showsubtitles</key>
-          <true/>
-          <key>showtitles</key>
-          <true/>
-          <key>subtitlesinfooter</key>
-          <false/>
-          <key>titlesinfooter</key>
-          <false/>
-        </dict>
-        <key>type</key>
-        <string>alfred.workflow.userinterface.grid</string>
-        <key>uid</key>
-        <string>6BF2DABE-7075-4735-8AC9-FF7A4641F429</string>
-        <key>version</key>
-        <integer>1</integer>
       </dict>
       <dict>
         <key>config</key>
@@ -467,6 +482,29 @@
         <key>version</key>
         <integer>1</integer>
       </dict>
+      <dict>
+        <key>config</key>
+        <dict>
+          <key>concurrently</key>
+          <false/>
+          <key>escaping</key>
+          <integer>102</integer>
+          <key>script</key>
+          <string>python3 habbit.py "{query}"</string>
+          <key>scriptargtype</key>
+          <integer>0</integer>
+          <key>scriptfile</key>
+          <string/>
+          <key>type</key>
+          <integer>11</integer>
+        </dict>
+        <key>type</key>
+        <string>alfred.workflow.action.script</string>
+        <key>uid</key>
+        <string>47698E04-4EC4-4D80-96B6-314E342F5241</string>
+        <key>version</key>
+        <integer>2</integer>
+      </dict>
     </array>
     <key>readme</key>
     <string># iCost 记账 Alfred Workflow
@@ -568,6 +606,8 @@ pip3 install openpyxl
     <dict>
       <key>0A1B2C3D-CAT1-0000-0000-000000000003</key>
       <dict>
+        <key>note</key>
+        <string>2. 选择一级分类</string>
         <key>xpos</key>
         <integer>640</integer>
         <key>ypos</key>
@@ -611,9 +651,16 @@ pip3 install openpyxl
       <key>0A1B2C3D-OPEN-0000-0000-000000000005</key>
       <dict>
         <key>xpos</key>
-        <integer>1380</integer>
+        <integer>1355</integer>
         <key>ypos</key>
         <integer>40</integer>
+      </dict>
+      <key>47698E04-4EC4-4D80-96B6-314E342F5241</key>
+      <dict>
+        <key>xpos</key>
+        <integer>1515</integer>
+        <key>ypos</key>
+        <integer>285</integer>
       </dict>
       <key>55A76E1F-6A12-4F86-BD23-953BF620B7FC</key>
       <dict>
@@ -642,6 +689,8 @@ pip3 install openpyxl
       </dict>
       <key>E9FB463B-1633-42E9-B784-A233DBA039B2</key>
       <dict>
+        <key>note</key>
+        <string>3. 选择二级分类</string>
         <key>xpos</key>
         <integer>1000</integer>
         <key>ypos</key>
@@ -651,7 +700,7 @@ pip3 install openpyxl
     <key>userconfigurationconfig</key>
     <array/>
     <key>version</key>
-    <string>1.0.2</string>
+    <string>1.0.3</string>
     <key>webaddress</key>
     <string/>
   </dict>

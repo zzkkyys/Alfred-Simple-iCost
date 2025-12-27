@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from workflow import Workflow3
 from icon_manager import get_icon_for_item, preload_icons, flush_download_queue
+from habbit import sort_by_frequency
 
 DATA_FILENAME = "icost_data.json"
 
@@ -57,6 +58,9 @@ def main(wf):
     # 加载账户列表
     config = load_data(wf)
     accounts = config.get("accounts", ["微信", "支付宝", "现金", "银行卡"])
+    
+    # 按使用频率排序
+    accounts = sort_by_frequency(wf, accounts, "accounts")
     
     # 预加载所有账户的图标
     preload_icons(wf, accounts)
