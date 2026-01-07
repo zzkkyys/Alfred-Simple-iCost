@@ -702,7 +702,7 @@ pip3 install openpyxl
     <key>userconfigurationconfig</key>
     <array/>
     <key>version</key>
-    <string>1.0.5</string>
+    <string>1.0.6</string>
     <key>webaddress</key>
     <string/>
   </dict>
