@@ -56,7 +56,7 @@ def save_frequency_data(wf, data: Dict):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-def record_usage(wf, account: str, category: str):
+def record_usage(wf, account: str, category: str, times: int = 1):
     """
     记录一次使用
     
@@ -69,11 +69,11 @@ def record_usage(wf, account: str, category: str):
     
     # 更新账户频率
     if account:
-        data["accounts"][account] = data["accounts"].get(account, 0) + 1
+        data["accounts"][account] = data["accounts"].get(account, 0) + max(1, int(times or 1))
     
     # 更新分类频率
     if category:
-        data["categories"][category] = data["categories"].get(category, 0) + 1
+        data["categories"][category] = data["categories"].get(category, 0) + max(1, int(times or 1))
     
     save_frequency_data(wf, data)
 
@@ -133,6 +133,21 @@ def record_from_url(wf, url: str):
         wf.logger.info(f"Recorded usage: account={account}, category={category}")
 
 
+def record_from_payload(wf, payload: str):
+    """Record usage from a single URL or multiple URLs separated by newlines."""
+    payload = (payload or "").strip()
+    if not payload:
+        return
+
+    urls = [line.strip() for line in payload.splitlines() if line.strip()]
+    if not urls:
+        return
+
+    # If multiple URLs are provided, record each (so frequency increases by count)
+    for u in urls:
+        record_from_url(wf, u)
+
+
 def sort_by_frequency(wf, items: List[str], item_type: str = "accounts") -> List[str]:
     """
     按使用频率排序列表
@@ -162,10 +177,10 @@ def main(wf):
         print("❌ 未提供 URL")
         return
     
-    url = wf.args[0].strip()
-    
-    if url:
-        record_from_url(wf, url)
+    payload = wf.args[0]
+
+    if payload:
+        record_from_payload(wf, payload)
         print("✅ 已记录使用频率")
     else:
         print("❌ URL 为空")

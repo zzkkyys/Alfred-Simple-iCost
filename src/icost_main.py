@@ -8,6 +8,7 @@ iCost Alfred Workflow - 主入口脚本
 import json
 import sys
 import os
+import re
 
 # 添加 workflow 包路径
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -34,32 +35,56 @@ def load_data(wf):
 def main(wf):
     # 获取用户输入
     query = wf.args[0].strip() if wf.args else ""
-    
-    # 解析输入，支持格式：金额 或 金额 备注
-    parts = query.split(None, 1)
-    amount = parts[0] if parts else ""
-    remark = parts[1] if len(parts) > 1 else ""
-    
-    # 验证金额是否为有效数字
-    try:
-        if amount:
-            float(amount)
+
+    def parse_amounts_and_remark(text: str) -> tuple[list[str], str]:
+        """Parse leading amounts (space/Chinese-comma separated) and optional remark."""
+        text = (text or "").strip()
+        if not text:
+            return [], ""
+
+        # Normalize delimiters: Chinese comma and normal comma both act as separators
+        normalized = text.replace("，", " ").replace(",", " ")
+        tokens = [t for t in normalized.split() if t]
+
+        amounts: list[str] = []
+        remark_tokens: list[str] = []
+
+        number_re = re.compile(r"^\d+(?:\.\d+)?$")
+
+        for i, token in enumerate(tokens):
+            if number_re.match(token):
+                amounts.append(token)
+            else:
+                remark_tokens = tokens[i:]
+                break
+
+        remark = " ".join(remark_tokens).strip()
+        return amounts, remark
+
+    amounts, remark = parse_amounts_and_remark(query)
+    amount = amounts[0] if amounts else ""
+
+    # 验证金额是否为有效数字（支持多个）
+    valid_amount = False
+    if amounts:
+        try:
+            for a in amounts:
+                float(a)
             valid_amount = True
             wf.setvar("last_amount", amount)
-        else:
+        except ValueError:
             valid_amount = False
-    except ValueError:
-        valid_amount = False
     
     if valid_amount:
         # 金额有效，显示消费和收入选项
         wf.add_item(
-            title=f"💸 消费 ¥{amount}",
+            title=f"💸 消费 ¥{amount}" + (f" (共{len(amounts)}笔)" if len(amounts) > 1 else ""),
             subtitle=f"记录一笔支出" + (f" - 备注: {remark}" if remark else ""),
             arg=json.dumps({
                 "action": "select_account",
                 "type": "expense",
                 "amount": amount,
+                "amounts": amounts,
                 "remark": remark
             }),
             uid="expense",
@@ -68,12 +93,13 @@ def main(wf):
         )
         
         wf.add_item(
-            title=f"💰 收入 ¥{amount}",
+            title=f"💰 收入 ¥{amount}" + (f" (共{len(amounts)}笔)" if len(amounts) > 1 else ""),
             subtitle=f"记录一笔收入" + (f" - 备注: {remark}" if remark else ""),
             arg=json.dumps({
                 "action": "select_account",
                 "type": "income",
                 "amount": amount,
+                "amounts": amounts,
                 "remark": remark
             }),
             uid="income",

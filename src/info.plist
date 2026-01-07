@@ -187,23 +187,25 @@
       <dict>
         <key>config</key>
         <dict>
-          <key>browser</key>
+          <key>concurrently</key>
+          <false/>
+          <key>escaping</key>
+          <integer>102</integer>
+          <key>script</key>
+          <string>python3 open_urls.py "{query}"</string>
+          <key>scriptargtype</key>
+          <integer>0</integer>
+          <key>scriptfile</key>
           <string/>
-          <key>skipqueryencode</key>
-          <true/>
-          <key>skipvarencode</key>
-          <true/>
-          <key>spaces</key>
-          <string/>
-          <key>url</key>
-          <string>{query}</string>
+          <key>type</key>
+          <integer>11</integer>
         </dict>
         <key>type</key>
-        <string>alfred.workflow.action.openurl</string>
+        <string>alfred.workflow.action.script</string>
         <key>uid</key>
         <string>0A1B2C3D-OPEN-0000-0000-000000000005</string>
         <key>version</key>
-        <integer>1</integer>
+        <integer>2</integer>
       </dict>
       <dict>
         <key>config</key>
@@ -700,7 +702,7 @@ pip3 install openpyxl
     <key>userconfigurationconfig</key>
     <array/>
     <key>version</key>
-    <string>1.0.3</string>
+    <string>1.0.4</string>
     <key>webaddress</key>
     <string/>
   </dict>

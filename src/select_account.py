@@ -52,7 +52,10 @@ def main(wf):
         data = {}
     
     record_type = data.get("type", "expense")
+    amounts = data.get("amounts") if isinstance(data.get("amounts"), list) else None
     amount = data.get("amount", "0")
+    if amounts:
+        amount = str(amounts[0])
     remark = data.get("remark", "")
     
     # 加载账户列表
@@ -78,6 +81,7 @@ def main(wf):
                 "action": "select_category1",
                 "type": record_type,
                 "amount": amount,
+                "amounts": amounts if amounts else [amount],
                 "remark": remark,
                 "account": account
             }),

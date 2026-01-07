@@ -74,10 +74,14 @@ def main(wf):
         data = {}
     
     record_type = data.get("type", "expense")
+    amounts = data.get("amounts") if isinstance(data.get("amounts"), list) else None
     amount = data.get("amount", "0")
+    if amounts:
+        amount = str(amounts[0])
     remark = data.get("remark", "")
     account = data.get("account", "")
     category1 = data.get("category1", "")
+    all_amounts = [str(a) for a in (amounts if amounts else [amount])]
     
     # 加载分类数据
     config = load_data(wf)
@@ -94,7 +98,8 @@ def main(wf):
     
     if not sub_categories:
         # 如果没有二级分类，直接使用一级分类
-        url = build_url(record_type, amount, account, category1, remark)
+        urls = [build_url(record_type, a, account, category1, remark) for a in all_amounts]
+        url = urls[0] if len(urls) == 1 else "\n".join(urls)
         icon_path = get_icon_for_item(wf, category1)
         
         wf.add_item(
@@ -114,7 +119,8 @@ def main(wf):
         
         for cat2 in sub_categories:
             # 使用二级分类名称（iCost 的 category 参数用二级分类）
-            url = build_url(record_type, amount, account, cat2, remark)
+            urls = [build_url(record_type, a, account, cat2, remark) for a in all_amounts]
+            url = urls[0] if len(urls) == 1 else "\n".join(urls)
             icon_path = get_icon_for_item(wf, cat2)
             
             wf.add_item(
